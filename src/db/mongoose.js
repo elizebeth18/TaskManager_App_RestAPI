@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const validator = require('validator');
 
 const connectDB = async () => {
     await mongoose.connect("mongodb://127.0.0.1:27017/task-manager-api");
@@ -10,33 +11,68 @@ connectDB();
 const userSchema = new mongoose.Schema({
     name: {
         type: String,
-        required: true
+        required: true,
+        trim: true
+    },
+    email: {
+        type: String,
+        required: true,
+        trim: true,
+        lowercase: true,
+        validate(value) {
+            if (!validator.isEmail(value)) {
+                throw new Error("Invalid email address");
+            }
+        }
+    },
+    password: {
+        type: String,
+        required: true,
+        trim: true,
+        minlength: 8,
+        validate: (value)=>{
+            if(value.toLowerCase().includes("password")){
+                throw new Error('Password cannot contain password')
+            }
+        }
     },
     age: {
         type: Number,
+        default: 0,
+        validate: {
+            validator: (value) => {
+                if (value < 0) {
+                    throw new Error('Age must be a positive number')
+                }
+            }
+        }
     }
 });
 
 const taskSchema = new mongoose.Schema({
     task: {
-        type: String
+        type: String,
+        required: true,
+        trim: true,
     },
     completed: {
-        type: String
+        type: String,
+        default: false,
     }
 });
 
 const User = mongoose.model("User", userSchema);
 const Task = mongoose.model("Task", taskSchema);
 
-const user = new User({
-    name: "Jackson",
-    age: 25
-});
+// const user = new User({
+//     name: "        Jenny     ",
+//     email: " MEMAIL@ME.COM      ",
+//     age: 45,
+//     password: "Jenn@123"
+// });
 
 const learnMongooseTask = new Task({
-    task: "Learn Express",
-    completed: false
+    task: "Drawing",
 });
 
 const savedTask = async () => {
@@ -60,4 +96,4 @@ const savedUser = async () => {
     }
 }
 
-savedUser();
+//savedUser();
