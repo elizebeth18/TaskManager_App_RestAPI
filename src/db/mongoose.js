@@ -8,46 +8,7 @@ const connectDB = async () => {
 
 connectDB();
 
-const userSchema = new mongoose.Schema({
-    name: {
-        type: String,
-        required: true,
-        trim: true
-    },
-    email: {
-        type: String,
-        required: true,
-        trim: true,
-        lowercase: true,
-        validate(value) {
-            if (!validator.isEmail(value)) {
-                throw new Error("Invalid email address");
-            }
-        }
-    },
-    password: {
-        type: String,
-        required: true,
-        trim: true,
-        minlength: 8,
-        validate: (value)=>{
-            if(value.toLowerCase().includes("password")){
-                throw new Error('Password cannot contain password')
-            }
-        }
-    },
-    age: {
-        type: Number,
-        default: 0,
-        validate: {
-            validator: (value) => {
-                if (value < 0) {
-                    throw new Error('Age must be a positive number')
-                }
-            }
-        }
-    }
-});
+
 
 const taskSchema = new mongoose.Schema({
     task: {
@@ -60,16 +21,8 @@ const taskSchema = new mongoose.Schema({
         default: false,
     }
 });
-
-const User = mongoose.model("User", userSchema);
 const Task = mongoose.model("Task", taskSchema);
 
-// const user = new User({
-//     name: "        Jenny     ",
-//     email: " MEMAIL@ME.COM      ",
-//     age: 45,
-//     password: "Jenn@123"
-// });
 
 const learnMongooseTask = new Task({
     task: "Drawing",
@@ -84,8 +37,14 @@ const savedTask = async () => {
     }
 }
 
-savedTask();
+//savedTask();
 
+// const user = new User({
+//     name: "        Jenny     ",
+//     email: " MEMAIL@ME.COM      ",
+//     age: 45,
+//     password: "Jenn@123"
+// });
 
 const savedUser = async () => {
     try {
