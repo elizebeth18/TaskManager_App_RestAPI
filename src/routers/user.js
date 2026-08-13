@@ -1,7 +1,8 @@
 const express = require('express');
 const router = new express.Router();
 const User = require("../models/user");
-const jwt = require('jsonwebtoken')
+
+const jwt = require('jsonwebtoken');
 
 router.post("/users", async (req, res, next) => {
 
@@ -11,8 +12,11 @@ router.post("/users", async (req, res, next) => {
         // Explicitly wait for the database to complete the save operation
         const savedUser = await user.save();
 
+        const token = await savedUser.generateAuthToken()
+
         // Respond with an appropriate HTTP status code
-        res.status(201).send(savedUser);
+        res.status(201).send({ savedUser, token });
+        
     } catch (error) {
         console.log(error)
         res.status(400).send(error)
@@ -24,8 +28,12 @@ router.post("/users/login", async (req, res, next) => {
         //User.findByCredentials is a user-defined method
         const user = await User.findByCredentials(req.body.email, req.body.password);
 
-        res.send(user);
-        
+        const token = await user.generateAuthToken();
+
+
+
+        res.send({ user, token });
+
     } catch (error) {
         res.status(400).send();
     }
