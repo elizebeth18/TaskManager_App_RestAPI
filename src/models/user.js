@@ -10,6 +10,7 @@ const userSchema = new mongoose.Schema({
     },
     email: {
         type: String,
+        unique: true,
         required: true,
         trim: true,
         lowercase: true,
@@ -43,6 +44,23 @@ const userSchema = new mongoose.Schema({
     }
 });
 
+//userSchema.statics is used to create custom methods that belong to the Mongoose Model itself.
+userSchema.statics.findByCredentials = async (email, password) => {
+    const user = await User.findOne({ email });
+
+    if (!user) {
+        throw new Error("Unable to login");
+    }
+
+    const isMatch = await bcrypt.compare(password, user.password);
+
+    if(!isMatch){
+        throw new Error("Unable to login");
+    }
+
+    return user;
+}
+
 
 //Mongoose pre('save') middleware used to hash the password before saving the user
 userSchema.pre('save', async function (next) {
@@ -50,7 +68,7 @@ userSchema.pre('save', async function (next) {
 
     //this runs both when user is created or when user's password is modified
     if (user.isModified("password")) {
-        user.password = await bcrypt.hash(user.password, 8)
+        user.password = await bcrypt.hash(user.password, 10)
     }
 
     console.log("just before saving!!");
