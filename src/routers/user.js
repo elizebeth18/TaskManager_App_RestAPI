@@ -17,7 +17,7 @@ router.post("/users", async (req, res, next) => {
 
         // Respond with an appropriate HTTP status code
         res.status(201).send({ savedUser, token });
-        
+
     } catch (error) {
         console.log(error)
         res.status(400).send(error)
@@ -31,8 +31,6 @@ router.post("/users/login", async (req, res, next) => {
 
         const token = await user.generateAuthToken();
 
-
-
         res.send({ user, token });
 
     } catch (error) {
@@ -40,15 +38,34 @@ router.post("/users/login", async (req, res, next) => {
     }
 });
 
-router.get("/users", auth, async (req, res, next) => {
-
+router.post("/users/logout", auth, async (req, res, next) => {
     try {
-        const users = await User.find({});
-        res.status(200).send(users);
-    } catch (e) {
+
+        req.user.tokens = req.user.tokens.filter((token) => {
+            return token.token !== req.token;
+        })
+
+        await req.user.save();
+
+        res.send("Logout Succesful");
+
+    } catch (error) {
         res.status(500).send();
     }
+});
 
+router.post("/users/logoutAll", auth, async (req, res, next) => {
+    try {
+        req.user.tokens = [];
+        await req.user.save();
+        res.send("Successfully logged out from all devices");
+    } catch (error) {
+        res.status(500).send();
+    }
+})
+
+router.get("/users/me", auth, async (req, res, next) => {
+    res.send(req.user);
 });
 
 router.get("/users/:id", async (req, res, next) => {
