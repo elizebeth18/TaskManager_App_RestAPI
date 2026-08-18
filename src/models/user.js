@@ -62,6 +62,16 @@ userSchema.methods.generateAuthToken = async function () {
     return token;
 }
 
+userSchema.methods.toJSON = function () {
+    const user = this;
+    const userObject = user.toObject();
+    
+    delete userObject.password;
+    delete userObject.tokens;
+
+    return userObject;
+}
+
 //userSchema.statics is used to create custom methods that belong to the Mongoose Model itself.
 userSchema.statics.findByCredentials = async (email, password) => {
     const user = await User.findOne({ email });
