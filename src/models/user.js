@@ -3,6 +3,8 @@ const validator = require('validator');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 
+const Task = require('../models/tasks');
+
 const userSchema = new mongoose.Schema({
     name: {
         type: String,
@@ -51,6 +53,13 @@ const userSchema = new mongoose.Schema({
     }]
 });
 
+
+userSchema.virtual('tasks', {
+    ref: 'Task',
+    localField: '_id',
+    foreignField: 'owner'
+});
+
 //userSchema.methods → create custom methods for individual documents.
 userSchema.methods.generateAuthToken = async function () {
     const user = this;
@@ -65,7 +74,7 @@ userSchema.methods.generateAuthToken = async function () {
 userSchema.methods.toJSON = function () {
     const user = this;
     const userObject = user.toObject();
-    
+
     delete userObject.password;
     delete userObject.tokens;
 
@@ -104,5 +113,18 @@ userSchema.pre('save', async function (next) {
     //next();
 });
 
+//pre('remove') is a Mongoose middleware hook that runs before a User document is removed from MongoDB
+
+/**By default, Mongoose treats pre('deleteOne') as query middleware (running on User.deleteOne()).To make it function as document middleware (so that this refers to the specific user instance), you must explicitly pass { document: true, query: false } as the second argument. */
+
+userSchema.pre('deleteOne', { document: true, query: false }, async function (next) {
+    const user = this;
+    console.log("=============", user)
+    await Task.deleteMany({ owner: user._id });
+
+    next();
+});
+
 const User = mongoose.model("User", userSchema);
+
 module.exports = User;
