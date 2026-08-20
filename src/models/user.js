@@ -110,7 +110,6 @@ userSchema.pre('save', async function (next) {
 
     console.log("just before saving!!");
 
-    //next();
 });
 
 //pre('remove') is a Mongoose middleware hook that runs before a User document is removed from MongoDB
@@ -119,10 +118,10 @@ userSchema.pre('save', async function (next) {
 
 userSchema.pre('deleteOne', { document: true, query: false }, async function (next) {
     const user = this;
-    console.log("=============", user)
-    await Task.deleteMany({ owner: user._id });
+    const deleTasks = await Task.deleteMany({ owner: user._id });
 
-    next();
+    console.log("deleTasks in pre",deleTasks);
+    
 });
 
 const User = mongoose.model("User", userSchema);
