@@ -22,21 +22,32 @@ router.post("/tasks", auth, async (req, res, next) => {
     }
 });
 
+//GET /tasks?completed=true
 router.get("/tasks", auth, async (req, res, next) => {
 
-    try {
-        //const result = await Task.find({ owner: req.user._id });
-        const user = await User.findById(req.user._id);
-        console.log("user", user);
-        const result = await user.populate('tasks');
+    const match = {};
 
-        console.log(result.tasks);
-
-        res.status(200).send(result.tasks);
-
-    } catch (error) {
-        res.status(500).send(error);
+    if (req.query.completed) {
+        match.completed  = req.query.completed === 'true';
     }
+
+
+        try {
+            //const result = await Task.find({ owner: req.user._id });
+            const user = await User.findById(req.user._id);
+
+            const result = await user.populate({
+                path: 'tasks',
+                match
+            });
+
+            console.log(result.tasks);
+
+            res.status(200).send(result.tasks);
+
+        } catch (error) {
+            res.status(500).send(error);
+        }
 
 });
 
@@ -102,7 +113,7 @@ router.patch("/tasks/:id", auth, async (req, res, next) => {
 
 router.delete("/tasks/:id", auth, async (req, res, next) => {
     try {
-        
+
         const deletedTask = await Task.findOneAndDelete({ _id: req.params.id, owner: req.user._id });
 
         if (!deletedTask) {

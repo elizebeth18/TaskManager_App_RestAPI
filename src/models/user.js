@@ -51,7 +51,7 @@ const userSchema = new mongoose.Schema({
             required: true
         }
     }]
-});
+}, { timestamps: true });
 
 
 userSchema.virtual('tasks', {
@@ -120,8 +120,8 @@ userSchema.pre('deleteOne', { document: true, query: false }, async function (ne
     const user = this;
     const deleTasks = await Task.deleteMany({ owner: user._id });
 
-    console.log("deleTasks in pre",deleTasks);
-    
+    console.log("deleTasks in pre", deleTasks);
+
 });
 
 const User = mongoose.model("User", userSchema);
