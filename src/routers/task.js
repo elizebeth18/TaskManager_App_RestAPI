@@ -23,31 +23,41 @@ router.post("/tasks", auth, async (req, res, next) => {
 });
 
 //GET /tasks?completed=true
+//GET /tasks?limit=10&skip=0
+//GET /tasks?sortBy=createdAt:asc
 router.get("/tasks", auth, async (req, res, next) => {
 
     const match = {};
+    const sort = {};
 
     if (req.query.completed) {
         match.completed  = req.query.completed === 'true';
     }
 
+    if (req.query.sortBy) {
+        const parts = req.query.sortBy.split(':');
+        sort[parts[0]] = parts[1] === 'asc' ? 1 : -1
+    }
 
-        try {
-            //const result = await Task.find({ owner: req.user._id });
-            const user = await User.findById(req.user._id);
+    try {
+        //const result = await Task.find({ owner: req.user._id });
+        const user = await User.findById(req.user._id);
 
-            const result = await user.populate({
-                path: 'tasks',
-                match
-            });
+        const result = await user.populate({
+            path: 'tasks',
+            match,
+            options: {
+                limit: parseInt(req.query.limit),
+                skip: parseInt(req.query.skip),
+                sort,
+            }
+        });
 
-            console.log(result.tasks);
+        res.status(200).send(result.tasks);
 
-            res.status(200).send(result.tasks);
-
-        } catch (error) {
-            res.status(500).send(error);
-        }
+    } catch (error) {
+        res.status(500).send(error);
+    }
 
 });
 

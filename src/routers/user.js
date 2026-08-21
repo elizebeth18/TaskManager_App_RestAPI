@@ -5,6 +5,9 @@ const User = require("../models/user");
 
 const jwt = require('jsonwebtoken');
 
+const multer = require('multer');
+
+
 router.post("/users", async (req, res, next) => {
 
     try {
@@ -121,5 +124,13 @@ router.delete("/users/me", auth, async (req, res, next) => {
         res.status(500).send(error);
     }
 });
+
+const upload = multer({
+    dest: 'avatars/'
+});
+
+router.post("/users/me/avatar", upload.single('avatar'),(req, res) => {
+    res.send();
+})
 
 module.exports = router;
