@@ -21,8 +21,10 @@ const upload = multer({
 
     },
     fileFilter: (req, file, cb) => {
-        if (!file.originalname.endsWith('.pdf')) {
-            return cb(new Error('File must be a PDF'))
+
+        if (!file.originalname.match(/\.(doc|docx)$/)) {
+            return cb(new Error('Please upload a Word Document'));
+            //return cb(new Error('File must be a PDF'))
         }
 
         cb(undefined, true);
@@ -31,6 +33,8 @@ const upload = multer({
 
 app.post('/upload', upload.single('image'), (req, res) => {
     res.send();
+}, (error, req, res, next) => {
+    res.status(400).send({ error: error.message })
 });
 
 
